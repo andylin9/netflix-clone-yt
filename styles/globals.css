@@ -5,8 +5,14 @@
 /* html tahs */
 @layer base {
   body {
-    /* 在 tailwind class 前面加上! 表示這個 class 的 css 會被加上 !important */
-    @apply bg-[#141414] text-white !scrollbar-thin !scrollbar-track-transparent !scrollbar-thumb-red-600;
+    /* 
+    在 tailwind class 前面加上!驚嘆號 表示這個 class 的 css 會被加上 !important 
+
+    scrollbar-thin 不要加驚嘆號否則會 body { overflow: overlay !important } 蓋掉下面這行 js
+    document.body.style.setProperty('overflow', 'hidden', 'important'); // index.tsx
+    上面這行 js 的用意是在 modal 開啟時 body 會需要 overflow: hidden 停用 scrollbar
+    */
+    @apply bg-[#141414] text-white scrollbar-thin !scrollbar-track-transparent !scrollbar-thumb-red-600;
   }
 
   header {
@@ -24,11 +30,11 @@
     @apply flex items-center gap-x-2 rounded px-5 py-1.5 text-sm font-semibold transition hover:opacity-75 md:py-2.5 md:px-8 md:text-xl;
   }
 
-  .input{
+  .input {
     @apply w-full rounded bg-[#333] px-5 py-3.5 placeholder-[#gray] outline-none focus:bg-[#454545];
   }
 
-  .modalButton{
-    @apply flex h-11 w-11 items-center justify-center rounded-full border-2 border-[gray] bg-[#2a2a2a]/60 transition hover:border-white hover:bg-white/10
+  .modalButton {
+    @apply flex h-11 w-11 items-center justify-center rounded-full border-2 border-[gray] bg-[#2a2a2a]/60 transition hover:border-white hover:bg-white/10;
   }
 }

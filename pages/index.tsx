@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import { useEffect } from "react";
 import { useRecoilValue } from "recoil";
 import { modalState } from "../atoms/modalAtom";
 import Banner from "../components/Banner";
@@ -35,6 +36,15 @@ const Home = ({
   const showModal = useRecoilValue(modalState);
 
   if (loading) return null;
+
+  useEffect(() => {
+  if (showModal) {
+    document.body.style.setProperty('overflow', 'hidden', 'important');
+  } else {
+    document.body.style.setProperty('overflow', 'overlay', 'important');
+  }
+  }, [showModal])
+  
 
   return (
     // bg-gradient-to-b has been set custom backgroundImage at tailwind.config.js theme > extend > backgroundImage
