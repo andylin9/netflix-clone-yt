@@ -27,7 +27,7 @@ function Header() {
     <header className={`${isScrolled && "bg-[#141414]"}`}>
       <div className="flex items-center space-x-2 md:space-x-10">
         <img
-          src="https://rb.gy/ulxxee"
+          src="/Netflix_2015_logo.svg"
           width={100}
           height={100}
           className="cursor-pointer object-contain"
@@ -50,7 +50,7 @@ function Header() {
         {/* <Link href="/account"> */}
         <img
           onClick={logout}
-          src="https://rb.gy/g1pwyx"
+          src="/user.png"
           alt=""
           className="cursor-pointer rounded"
         />
