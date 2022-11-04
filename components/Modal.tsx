@@ -4,13 +4,17 @@ import {
   HandThumbUpIcon,
   SpeakerXMarkIcon,
   SpeakerWaveIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
 import MuiModal from "@mui/material/Modal";
+import { deleteDoc, doc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { FaPlay } from "react-icons/fa";
 import ReactPlayer from "react-player";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { modalState, movieState } from "../atoms/modalAtom";
+import { db } from "../firebase";
+import useAuth from "../hooks/useAuth";
 import { Element, Genre } from "../typings";
 
 function Modal() {
@@ -19,6 +23,8 @@ function Modal() {
   const [trailer, setTrailer] = useState("");
   const [genres, setGenres] = useState<Genre[]>([]);
   const [muted, setMuted] = useState(true);
+  const { user } = useAuth();
+  const [addedToList, setAddedToList] = useState(false);
 
   useEffect(() => {
     if (!movie) return;
@@ -46,6 +52,12 @@ function Modal() {
     }
     fetchMovie();
   }, [movie]);
+
+  const handleList = async() => {
+    if (addedToList) {
+      await deleteDoc(doc(db,'customers',user!.uid,'myList',movie?.id.toString()!))
+    }
+  };
 
   const handleClose = () => {
     setShowModal(false);
@@ -86,8 +98,12 @@ function Modal() {
                 Play
               </button>
 
-              <button className="modalButton">
-                <PlusIcon className="h-7 w-7" />
+              <button className="modalButton" onClick={handleList}>
+                {addedToList ? (
+                  <CheckIcon className="h-7 w-7" />
+                ) : (
+                  <PlusIcon className="h-7 w-7" />
+                )}
               </button>
 
               <button className="modalButton">
