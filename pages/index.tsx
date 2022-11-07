@@ -1,3 +1,4 @@
+import { getProducts, Product } from "@stripe/firestore-stripe-payments";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useEffect } from "react";
@@ -6,8 +7,11 @@ import { modalState } from "../atoms/modalAtom";
 import Banner from "../components/Banner";
 import Header from "../components/Header";
 import Modal from "../components/Modal";
+import Plans from "../components/Plans";
 import Row from "../components/Row";
 import useAuth from "../hooks/useAuth";
+import useSubscription from "../hooks/useSubscription";
+import payments from "../lib/stripe";
 import { Movie } from "../typings";
 import requests from "../utils/requests";
 
@@ -20,6 +24,7 @@ interface Props {
   horrorMovies: Movie[];
   romanceMovies: Movie[];
   documentaries: Movie[];
+  products: Product[];
 }
 
 const Home = ({
@@ -31,20 +36,31 @@ const Home = ({
   romanceMovies,
   topRated,
   trendingNow,
+  products,
 }: Props) => {
-  const { loading } = useAuth();
+  console.log(products);
+  const { loading, user } = useAuth();
   const showModal = useRecoilValue(modalState);
+  const subscription = useSubscription(user);
+  console.log(subscription);
 
-  if (loading) return null;
-
+  // Error: Rendered more hooks than during the previous render
+  // https://stackoverflow.com/questions/55622768/uncaught-invariant-violation-rendered-more-hooks-than-during-the-previous-rende
+  // useEffect 必須放在這個組件 return jsx 前面，
+  // 如果 useEffect 放在組建返回之後:
+  // 第一次渲染組件返回後 useEffect 不會運行，當 loading 或 subscription 狀態改變時，第二次渲染開始， 運行了useEffect 並且發生錯誤。
+  // 原因是第一次渲染沒有運行 useEffect 第二次卻運行了 useEffect，讓 react 認為第二次的渲染用的鉤子比第一次多而發生錯誤
   useEffect(() => {
-  if (showModal) {
-    document.body.style.setProperty('overflow', 'hidden', 'important');
-  } else {
-    document.body.style.setProperty('overflow', 'overlay', 'important');
-  }
-  }, [showModal])
-  
+    if (showModal) {
+      document.body.style.setProperty("overflow", "hidden", "important");
+    } else {
+      document.body.style.setProperty("overflow", "overlay", "important");
+    }
+  }, [showModal]);
+
+  if (loading || subscription === null) return null;
+
+  if (!subscription) return <Plans products={products} />;
 
   return (
     // bg-gradient-to-b has been set custom backgroundImage at tailwind.config.js theme > extend > backgroundImage
@@ -75,6 +91,13 @@ const Home = ({
 export default Home;
 
 export const getServerSideProps = async () => {
+  const products = await getProducts(payments, {
+    includePrices: true,
+    activeOnly: true,
+  })
+    .then((res) => res)
+    .catch((error) => console.log(error.message));
+
   const [
     netflixOriginals,
     trendingNow,
@@ -105,6 +128,7 @@ export const getServerSideProps = async () => {
       horrorMovies: horrorMovies.results,
       romanceMovies: romanceMovies.results,
       documentaries: documentaries.results,
+      products: products,
     },
   };
 };
